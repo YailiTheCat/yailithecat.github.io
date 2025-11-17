@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VRChat Mutual Friends Map</title>
+    <script src="graphology.umd.min.js"></script>
+    <script src="sigma.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body,
+        #container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: #040D12;
+            font-family: "Inter", sans-serif;
+            font-optical-sizing: auto;
+            font-style: normal;
+            color: #89c7af;
+        }
+
+        h1 {
+            font-size: 32px;
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        h1, h2 {
+            color: #5C8374;
+        }
+
+        ol {
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 15px;
+        }
+
+        a {
+            color: #47e8e8;
+        }
+
+        kbd {
+            font-family: "Google Sans Code", monospace;
+            font-size: 80%;
+            border: 1px solid #183D3D;
+            border-radius: 4px;
+            padding: 0 4px;
+        }
+
+        code {
+            font-family: "Google Sans Code", monospace;
+            font-size: 80%;
+            border: 1px solid #183D3D;
+            border-radius: 4px;
+            padding: 0 4px;
+            display: block;
+            margin: 20px;
+            word-wrap: break-word;
+            overflow: hidden;
+            color: #368888;
+            max-width: 388px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        button {
+            padding: 10px 40px;
+            background: #183D3D;
+            border: 2px solid #5C8374;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #93B1A6;
+            font-family: "Inter", sans-serif;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #5C8374;
+            color: #183D3D;
+        }
+
+        button:active {
+            background: #040D12;
+            color: #93B1A6;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: .3;
+            background: #183D3D;
+            color: #93B1A6;
+        }
+
+        textarea {
+            font-family: "Google Sans Code", monospace;
+            font-size: 80%;
+            display: block;
+            resize: none;
+            color: #368888;
+            width: 388px;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 20px;
+            border: 1px solid #183D3D;
+            border-radius: 4px;
+        }
+
+        #load-button {
+            width: 100%;
+        }
+
+        #clear-data {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <button style="display: none" id="clear-data" type="button">Clear Data</button>
+
+    <div id="content" style="display: none">
+        <h1>VRChat Mutual Friends Map</h1>
+
+        <h2>How to use:</h2>
+        <ol>
+            <li>Open <a href="https://api.vrchat.cloud/api/" target="_blank">https://api.vrchat.cloud/api/</a></li>
+            <li>Open the console (<kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>J</kbd>)</li>
+            <li>
+                Paste this code snippet into the console and press <kbd>Enter</kbd>
+                <br />
+                <code>
+    fetch('https://raw.githubusercontent.com/AAAA/friends/master/scripts/loader.js').then(data => data.text()).then(eval)
+                </code>
+            </li>
+            <li>Close the console and follow instructions on the page</li>
+            <li>
+                After you copy your friend data to clipboard paste it here:
+                <br />
+                <textarea id="input" rows="4"></textarea>
+                <button id="load-button" type="button">Load</button>
+            </li>
+        </ol>
+    </div>
+
+    <div id="container"></div>
+
+<script type="module">
+    import * as graphologyCommunitiesLouvain from 'https://esm.run/graphology-communities-louvain';
+    import * as graphologyLayoutForceatlas2 from 'https://esm.run/graphology-layout-forceatlas2';
+
+    const input = document.getElementById('input');
+    const loadButton = document.getElementById('load-button');
+    const clearDataButton = document.getElementById('clear-data');
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            loadButton.click();
+        }
+    })
+
+    loadButton.addEventListener('click', () => {
+        let data = null;
+        try {
+            data = JSON.parse(input.value);
+            if (!data) {
+                throw new Error('No data found.');
+            }
+
+            if (!data.currentUser) {
+                throw new Error('Could not find user data.');
+            }
+
+            if (!data.friends) {
+                throw new Error('Could not find friends data.');
+            }
+
+            if (!data.mutuals) {
+                throw new Error('Could not find mutuals data.');
+            }
+        } catch (e) {
+            alert('Invalid JSON data. Please check your input.');
+            return;
+        }
+
+        localStorage.setItem('vrchat-friends-data', JSON.stringify(data));
+        start();
+    });
+
+    clearDataButton.addEventListener('click', () => {
+        localStorage.clear();
+        window.location.reload(true);
+    })
+
+    const start = () => {
+        let storedData = localStorage.getItem('vrchat-friends-data');
+        if (!storedData) {
+            document.getElementById('content').style.display = 'block';
+            return;
+        }
+
+        try {
+            storedData = JSON.parse(storedData);
+            if (!storedData) {
+                throw new Error('No data found.');
+            }
+
+            if (!storedData.currentUser) {
+                throw new Error('Could not find user data.');
+            }
+
+            if (!storedData.friends) {
+                throw new Error('Could not find friends data.');
+            }
+
+            if (!storedData.mutuals) {
+                throw new Error('Could not find mutuals data.');
+            }
+        } catch (e) {
+            document.getElementById('content').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('content').innerHTML = ``;
+        document.getElementById('content').style.display = 'block';
+        clearDataButton.style.display = 'block';
+
+        const graph = new graphology.Graph();
+        graph.addNode("me", { label: "Me", x: 0, y: 0, size: 10, color: "green" });
+
+        storedData.friends.forEach(f => {
+            graph.addNode(f.id, { label: f.displayName, x: Math.random(), y: Math.random(), size: 5 });
+            graph.addEdge("me", f.id, {color: 'blue'});
+        });
+
+        Object.keys(storedData.mutuals).forEach(id1 => {
+            storedData.mutuals[id1].forEach(id2 => {
+                if (graph.hasNode(id1) && graph.hasNode(id2) && !graph.hasEdge(id1, id2) && id1 !== id2) {
+                    graph.addEdge(id1, id2, {color: 'blue'});
+                }
+            });
+        });
+
+        graphologyCommunitiesLouvain.default.assign(graph, {getEdgeWeight: null});
+
+        graphologyLayoutForceatlas2.default.assign(graph, {
+            iterations: 500,
+            settings: {
+                gravity: 10
+            }
+        });
+
+        function hslToRgb(h, s, l) {
+            let r, g, b;
+
+            if (s === 0) {
+                r = g = b = l; // achromatic
+            } else {
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hueToRgb(p, q, h + 1/3);
+                g = hueToRgb(p, q, h);
+                b = hueToRgb(p, q, h - 1/3);
+            }
+
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        function hueToRgb(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        }
+
+        graph.nodes().forEach(node => {
+            const community = graph.getNodeAttribute(node, 'community');
+            const c = hslToRgb((community * 137.508) % 360 / 360, 1, 0.5);
+            graph.setNodeAttribute(node, 'color', `rgb(${c[0]}, ${c[1]}, ${c[2]})`);
+
+            if (graph.neighbors(node).length < 2) {
+                graph.setNodeAttribute(node, 'color', 'rgb(150, 150, 150)');
+            }
+
+            graph.setNodeAttribute(node, 'size', (graph.neighbors(node).length / 10) + 5);
+
+            if (node === "me") {
+                graph.setNodeAttribute(node, 'color', 'green');
+            }
+        });
+
+        const renderer = new Sigma(
+            graph,
+            document.getElementById("container"),
+            { labelColor: {color: 'rgb(200, 200, 200)'} }
+        );
+    };
+
+    start();
+</script>
+</body>
+</html>
