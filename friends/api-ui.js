@@ -105,7 +105,7 @@ form input {
 let pLimit = null;
 let limitFn = null;
 
-const getFriends = (page, online) => fetch(`https://api.vrchat.cloud/api/1/auth/user/friends?offset=${page * 100}&offline=${!online}&n=100`, {
+const getFriends = (page, online) => fetch(`https://api.vrchat.cloud/api/1/auth/user/friends?offset=${page * 50}&offline=${!online}&n=50`, {
     method: "GET",
     headers: {
         "Content-Type": "application/json"
@@ -129,7 +129,7 @@ const getMutualAllMutualFriendsOfFriend = async (id) => {
         const pageData = await getMutualFriendsOfFriend(id, page);
         data = [...data, ...pageData];
         page++;
-        if (pageData.length < 50) {
+        if (pageData.length === 0) {
             break;
         }
     }
@@ -146,7 +146,7 @@ const getAllFriends = async () => {
         data = [...data, ...pageData];
         page++;
         logMessage(`Loaded ${data.length} friends so far...`);
-        if (pageData.length < 100) {
+        if (pageData.length === 0) {
             break;
         }
     }
@@ -157,7 +157,7 @@ const getAllFriends = async () => {
         data = [...data, ...pageData];
         page++;
         logMessage(`Loaded ${data.length} friends so far...`);
-        if (pageData.length < 100) {
+        if (pageData.length === 0) {
             break;
         }
     }
