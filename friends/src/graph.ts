@@ -22,41 +22,14 @@ export function createGraph(data: Data) {
             labelColor: { color: 'rgb(200, 200, 200)' },
         });
 
+        let hoveredNode: null | string = null;
+
         sigma.addListener('enterNode', e => {
-            const nodeId = e.node;
-
-            sigma.setSetting(
-                'nodeReducer',
-                nodeId
-                    ? (node, data) => {
-                          return node === nodeId || graph.hasEdge(node, nodeId) || graph.hasEdge(nodeId, node)
-                              ? { ...data, zIndex: 1, forceLabel: true }
-                              : {
-                                    ...data,
-                                    zIndex: 0,
-                                    label: '',
-                                    color: 'rgb(80,80,80)',
-                                    image: null,
-                                    highlighted: false,
-                                };
-                      }
-                    : null,
-            );
-
-            sigma.setSetting(
-                'edgeReducer',
-                nodeId
-                    ? (edge, data) =>
-                          graph.hasExtremity(edge, nodeId)
-                              ? { ...data, color: 'rgb(255,0,0)' }
-                              : { ...data, color: 'rgb(0,0,90)' }
-                    : null,
-            );
+            hoveredNode = e.node;
         });
 
         sigma.addListener('leaveNode', e => {
-            sigma.setSetting('nodeReducer', null);
-            sigma.setSetting('edgeReducer', null);
+            hoveredNode = null;
         });
 
         sigma.addListener('afterRender', () => {
@@ -69,9 +42,32 @@ export function createGraph(data: Data) {
                     element!.style.top = `${position.y - size / 2}px`;
                     element!.setAttribute('width', `${size}`);
                 }
+
+                if (hoveredNode) {
+                    return node === hoveredNode || graph.hasEdge(node, hoveredNode) || graph.hasEdge(hoveredNode, node)
+                        ? { ...data, zIndex: 1, forceLabel: true }
+                        : {
+                            ...data,
+                            zIndex: 0,
+                            label: '',
+                            color: 'rgb(80,80,80)',
+                            image: null,
+                            highlighted: false,
+                        };
+                }
+
                 return data;
             });
-            sigma.setSetting('edgeReducer', null);
+
+            sigma.setSetting(
+                'edgeReducer',
+                hoveredNode
+                    ? (edge, data) =>
+                          graph.hasExtremity(edge, hoveredNode)
+                              ? { ...data, color: 'rgb(255,0,0)' }
+                              : { ...data, color: 'rgb(0,0,90)' }
+                    : null,
+            );
         });
     };
 
