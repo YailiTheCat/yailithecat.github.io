@@ -11,13 +11,13 @@ export function createGraph(data: Data) {
 
     data.friends.forEach(f => {
         graph.addNode(f.id, { label: f.displayName, x: Math.random(), y: Math.random(), size: 5 });
-        graph.addEdge('me', f.id, { color: 'rgba(0,0,255,0.2)' });
+        graph.addEdge('me', f.id, { color: 'rgba(255,0,255,0.2)' });
     });
 
     Object.keys(data.mutuals ?? {}).forEach(id1 => {
         data.mutuals[id1].forEach(id2 => {
             if (graph.hasNode(id1) && graph.hasNode(id2) && !graph.hasEdge(id1, id2) && id1 !== id2) {
-                graph.addEdge(id1, id2, { color: `rgba(0,0,255,0.2)` });
+                graph.addEdge(id1, id2, { color: `rgba(255,0,255,0.2)` });
             }
         });
     });
