@@ -11,7 +11,7 @@ export function createGraph(data: Data) {
 
     data.friends.forEach(f => {
         graph.addNode(f.id, { label: f.displayName, x: Math.random(), y: Math.random(), size: 5 });
-        graph.addEdge('me', f.id, { color: 'blue' });
+        graph.addEdge('me', f.id, { color: 'rgba(0,0,255,0.2)' });
     });
 
     Object.keys(data.mutuals ?? {}).forEach(id1 => {
