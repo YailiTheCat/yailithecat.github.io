@@ -146,11 +146,27 @@
             z-index: 9999;
             width: 165px;
         }
+
+        #search {
+            position: absolute;
+            top: 120px;
+            left: 10px;
+            z-index: 9999;
+            width: 165px;
+            font-size: 16px;
+            padding: 4px 6px;
+            color: #93B1A6;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #93B1A6;
+            border-radius: 2px;
+            font-family: "Inter", sans-serif;
+        }
     </style>
 </head>
 <body>
     <button style="display: none" id="clear-data" type="button">Clear Data</button>
     <button style="display: none" id="toggle-pics" type="button">Toggle Pics</button>
+    <input style="display: none" id="search" type="text" placeholder="Search...">
 
     <div id="content" style="display: none">
         <h1>VRChat Mutual Friends Explorer</h1>

@@ -8,6 +8,7 @@ import { Data } from './types';
 export function createGraph(data: Data) {
     let loadedImgs = 0;
     let created = false;
+    const nodeToName: Record<string, string> = {};
 
     const imgLoaded = () => {
         loadedImgs++;
@@ -33,6 +34,10 @@ export function createGraph(data: Data) {
         });
 
         sigma.addListener('afterRender', () => {
+            const searchValue = ((document.getElementById('search') as HTMLInputElement).value ?? '')
+                .trim()
+                .toLowerCase();
+
             sigma.setSetting('nodeReducer', (node, data) => {
                 if (node != 'me') {
                     const element = document.getElementById(`img-${node}`);
@@ -41,19 +46,45 @@ export function createGraph(data: Data) {
                     element!.style.left = `${position.x - size / 2}px`;
                     element!.style.top = `${position.y - size / 2}px`;
                     element!.setAttribute('width', `${size}`);
+
+                    if (!!searchValue) {
+                        element!.style.opacity = (nodeToName[node] ?? '').toLowerCase().includes(searchValue)
+                            ? `1`
+                            : `0`;
+                    } else if (!!hoveredNode) {
+                        element!.style.opacity =
+                            node === hoveredNode || graph.hasEdge(node, hoveredNode) || graph.hasEdge(hoveredNode, node)
+                                ? `1`
+                                : `0.2`;
+                    } else {
+                        element!.style.opacity = `1`;
+                    }
+                }
+
+                if (!!searchValue) {
+                    return (nodeToName[node] ?? '').toLowerCase().includes(searchValue)
+                        ? { ...data, zIndex: 1, forceLabel: true }
+                        : {
+                              ...data,
+                              zIndex: 0,
+                              label: '',
+                              color: 'rgb(20,20,20)',
+                              image: null,
+                              highlighted: false,
+                          };
                 }
 
                 if (hoveredNode) {
                     return node === hoveredNode || graph.hasEdge(node, hoveredNode) || graph.hasEdge(hoveredNode, node)
                         ? { ...data, zIndex: 1, forceLabel: true }
                         : {
-                            ...data,
-                            zIndex: 0,
-                            label: '',
-                            color: 'rgb(80,80,80)',
-                            image: null,
-                            highlighted: false,
-                        };
+                              ...data,
+                              zIndex: 0,
+                              label: '',
+                              color: 'rgb(80,80,80)',
+                              image: null,
+                              highlighted: false,
+                          };
                 }
 
                 return data;
@@ -82,6 +113,7 @@ export function createGraph(data: Data) {
         imgLoaded();
         graph.addNode(f.id, { label: f.displayName, x: Math.random(), y: Math.random(), size: 5, image: f.imageUrl });
         graph.addEdge('me', f.id, { color: 'rgb(0,0,120)' });
+        nodeToName[f.id] = f.displayName;
     });
 
     Object.keys(data.mutuals ?? {}).forEach(id1 => {
