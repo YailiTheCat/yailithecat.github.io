@@ -4,6 +4,7 @@ import { createGraph } from './graph';
 const input = document.getElementById('input') as HTMLInputElement;
 const loadButton = document.getElementById('load-button');
 const clearDataButton = document.getElementById('clear-data');
+const togglePicsButton = document.getElementById('toggle-pics');
 
 input?.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
@@ -46,6 +47,11 @@ clearDataButton?.addEventListener('click', () => {
     window.location.reload();
 });
 
+togglePicsButton?.addEventListener('click', () => {
+    document.getElementById('img-tmp')!.style.visibility =
+        document.getElementById('img-tmp')!.style.visibility === 'hidden' ? 'visible' : 'hidden';
+});
+
 const start = () => {
     const storedData = localStorage.getItem('vrchat-friends-data');
     let parsedStoredData: null | Data = null;
@@ -79,6 +85,7 @@ const start = () => {
     document.getElementById('content')!.innerHTML = ``;
     document.getElementById('content')!.style.display = 'block';
     clearDataButton!.style.display = 'block';
+    togglePicsButton!.style.display = 'block';
 
     if (parsedStoredData) {
         createGraph(parsedStoredData);

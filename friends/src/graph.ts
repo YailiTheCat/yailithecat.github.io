@@ -95,7 +95,7 @@ export function createGraph(data: Data) {
     const maxNeighbors = Math.max(...graph.nodes().map(node => (node === 'me' ? 0 : graph.neighbors(node).length)));
 
     graph.nodes().forEach(node => {
-        graph.setNodeAttribute(node, 'size', 2 + 13 * (graph.neighbors(node).length / maxNeighbors));
+        graph.setNodeAttribute(node, 'size', 5 + 10 * (graph.neighbors(node).length / maxNeighbors));
 
         if (node === 'me') {
             graph.setNodeAttribute(node, 'size', 15);
