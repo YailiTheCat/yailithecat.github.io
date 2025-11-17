@@ -1,0 +1,17 @@
+{
+    "dependencies": {
+        "graphology": "^0.26.0",
+        "graphology-communities-louvain": "^2.0.2",
+        "graphology-layout-forceatlas2": "^0.10.1",
+        "prettier": "^3.6.2",
+        "sigma": "^3.0.2"
+    },
+    "scripts": {
+        "build": "webpack -c ./webpack.config.js"
+    },
+    "devDependencies": {
+        "ts-loader": "^9.5.4",
+        "typescript": "^5.9.3",
+        "webpack-cli": "^6.0.1"
+    }
+}
