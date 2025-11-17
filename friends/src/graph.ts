@@ -11,13 +11,13 @@ export function createGraph(data: Data) {
 
     data.friends.forEach(f => {
         graph.addNode(f.id, { label: f.displayName, x: Math.random(), y: Math.random(), size: 5 });
-        graph.addEdge('me', f.id, { color: 'rgba(255,0,255,0.2)' });
+        graph.addEdge('me', f.id, { color: 'rgb(0,0,120)' });
     });
 
     Object.keys(data.mutuals ?? {}).forEach(id1 => {
         data.mutuals[id1].forEach(id2 => {
             if (graph.hasNode(id1) && graph.hasNode(id2) && !graph.hasEdge(id1, id2) && id1 !== id2) {
-                graph.addEdge(id1, id2, { color: `rgba(255,0,255,0.2)` });
+                graph.addEdge(id1, id2, { color: `rgb(0,0,120)` });
             }
         });
     });
@@ -47,7 +47,36 @@ export function createGraph(data: Data) {
         }
     });
 
-    const renderer = new Sigma(graph, document.getElementById('container')!, {
+    const sigma = new Sigma(graph, document.getElementById('container')!, {
         labelColor: { color: 'rgb(200, 200, 200)' },
+    });
+
+    sigma.addListener('enterNode', e => {
+        const nodeId = e.node;
+
+        sigma.setSetting(
+            'nodeReducer',
+            nodeId
+                ? (node, data) =>
+                      node === nodeId || graph.hasEdge(node, nodeId) || graph.hasEdge(nodeId, node)
+                          ? { ...data, zIndex: 1 }
+                          : { ...data, zIndex: 0, label: '', color: 'rgb(80,80,80)', image: null, highlighted: false }
+                : null,
+        );
+
+        sigma.setSetting(
+            'edgeReducer',
+            nodeId
+                ? (edge, data) =>
+                      graph.hasExtremity(edge, nodeId)
+                          ? { ...data, color: 'rgb(255,0,0)' }
+                          : { ...data, color: 'rgb(0,0,90)' }
+                : null,
+        );
+    });
+
+    sigma.addListener('leaveNode', e => {
+        sigma.setSetting('nodeReducer', null);
+        sigma.setSetting('edgeReducer', null);
     });
 }
