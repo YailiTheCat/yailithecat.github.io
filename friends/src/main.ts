@@ -47,7 +47,10 @@ loadButton?.addEventListener('click', () => {
         return;
     }
 
-    localStorage.setItem('vrchat-friends-data', JSON.stringify(data));
+    let string = JSON.stringify(data);
+    string = (window as any).LZString.compress(string);
+    localStorage.setItem('vrchat-friends-data', string);
+    localStorage.setItem('vrchat-friends-data-compressed', 'true');
     start();
 });
 
@@ -72,7 +75,11 @@ document.getElementById('sidepanel-close')?.addEventListener('click', () => {
 });
 
 const start = () => {
-    const storedData = localStorage.getItem('vrchat-friends-data');
+    let storedData = localStorage.getItem('vrchat-friends-data');
+    if (localStorage.getItem('vrchat-friends-data-compressed') === 'true') {
+        storedData = (window as any).LZString.decompress(storedData);
+    }
+
     let parsedStoredData: null | Data = null;
     if (!storedData) {
         document.getElementById('content')!.style.display = 'block';
