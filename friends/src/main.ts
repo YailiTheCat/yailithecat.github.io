@@ -6,6 +6,8 @@ const loadButton = document.getElementById('load-button');
 const clearDataButton = document.getElementById('clear-data');
 const togglePicsButton = document.getElementById('toggle-pics');
 const searchInput = document.getElementById('search');
+const friendsProgressRange = document.getElementById('friends-progress');
+const friendsProgressButton = document.getElementById('friends-progress-play');
 
 input?.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
@@ -13,6 +15,10 @@ input?.addEventListener('keydown', e => {
         e.stopPropagation();
         loadButton?.click();
     }
+});
+
+friendsProgressButton?.addEventListener('click', () => {
+    (window as any).playing = !(window as any).playing;
 });
 
 loadButton?.addEventListener('click', () => {
@@ -94,6 +100,8 @@ const start = () => {
     clearDataButton!.style.display = 'block';
     togglePicsButton!.style.display = 'block';
     searchInput!.style.display = 'block';
+    friendsProgressRange!.style.display = 'block';
+    friendsProgressButton!.style.display = 'block';
 
     if (parsedStoredData) {
         createGraph(parsedStoredData);

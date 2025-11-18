@@ -161,12 +161,30 @@
             border-radius: 2px;
             font-family: "Inter", sans-serif;
         }
+
+        #friends-progress-play {
+            position: absolute;
+            top: 165px;
+            left: 10px;
+            z-index: 9999;
+            width: 165px;
+        }
+
+        #friends-progress {
+            position: absolute;
+            left: 10px;
+            z-index: 9999;
+            top: 215px;
+            width: 165px;
+        }
     </style>
 </head>
 <body>
     <button style="display: none" id="clear-data" type="button">Clear Data</button>
     <button style="display: none" id="toggle-pics" type="button">Toggle Pics</button>
     <input style="display: none" id="search" type="text" placeholder="Search...">
+    <button style="display: none" id="friends-progress-play" type="button">Play/Pause</button>
+    <input style="display: none" type="range" id="friends-progress" min="0" max="1" />
 
     <div id="content" style="display: none">
         <h1>VRChat Mutual Friends Explorer</h1>

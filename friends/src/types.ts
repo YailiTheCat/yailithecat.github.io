@@ -1,5 +1,5 @@
 export interface Data {
-    currentUser: {};
+    currentUser: { friends: string[] };
     friends: { displayName: string; id: string; imageUrl: string }[];
     mutuals: Record<string, string[]>;
 }

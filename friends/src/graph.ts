@@ -9,6 +9,14 @@ export function createGraph(data: Data) {
     let loadedImgs = 0;
     let created = false;
     const nodeToName: Record<string, string> = {};
+    const nodeToIndex: Record<string, number> = {};
+    const friendsProgressRange = document.getElementById('friends-progress') as HTMLInputElement;
+
+    friendsProgressRange.max = `${data.friends.length}`;
+    friendsProgressRange.min = `0`;
+    friendsProgressRange.value = friendsProgressRange.max;
+
+    let lastFrameTime = +new Date();
 
     const imgLoaded = () => {
         loadedImgs++;
@@ -17,6 +25,10 @@ export function createGraph(data: Data) {
             created = true;
         }
     };
+
+    for (let i = 0; i < data.currentUser.friends.length; i++) {
+        nodeToIndex[data.currentUser.friends[i]] = i;
+    }
 
     const createRenderer = () => {
         const sigma = new Sigma(graph, document.getElementById('container')!, {
@@ -34,6 +46,20 @@ export function createGraph(data: Data) {
         });
 
         sigma.addListener('afterRender', () => {
+            const playing = !!(window as any).playing;
+
+            if (playing) {
+                const now = +new Date();
+                const delta = now - lastFrameTime;
+                if (delta > 200) {
+                    lastFrameTime = now;
+                    const newVal = parseInt(friendsProgressRange.value, 10) + 1;
+                    friendsProgressRange.value = `${newVal > parseInt(friendsProgressRange.max, 10) ? 0 : newVal}`;
+                }
+            }
+
+            const visibleSlider = parseInt(friendsProgressRange.value, 10);
+
             const searchValue = ((document.getElementById('search') as HTMLInputElement).value ?? '')
                 .trim()
                 .toLowerCase();
@@ -46,6 +72,12 @@ export function createGraph(data: Data) {
                     element!.style.left = `${position.x - size / 2}px`;
                     element!.style.top = `${position.y - size / 2}px`;
                     element!.setAttribute('width', `${size}`);
+
+                    const index = (nodeToIndex[node] ?? 0) + 1;
+                    if (index > visibleSlider) {
+                        element!.style.opacity = `0`;
+                        return { ...data, hidden: true };
+                    }
 
                     if (!!searchValue) {
                         element!.style.opacity = (nodeToName[node] ?? '').toLowerCase().includes(searchValue)
