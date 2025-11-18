@@ -177,6 +177,96 @@
             top: 215px;
             width: 165px;
         }
+
+        #help-1 {
+            position: absolute;
+            left: 10px;
+            z-index: 9999;
+            top: 235px;
+            width: 165px;
+            pointer-events: none;
+            font-size: 12px;
+            text-align: center;
+            opacity: 0.6;
+        }
+
+        #sidepanel {
+            display: block;
+            width: 400px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: #343434;
+            z-index: 9999;
+            transition: right 0.3s ease-in-out;
+            box-shadow: -10px 0 5px rgba(82, 82, 82, 0.2);
+            overflow: auto;
+            padding: 15px;
+        }
+
+        #sidepanel-name {
+            font-size: 20px;
+            display: block;
+        }
+
+        #sidepanel-status {
+            font-size: 18px;
+            display: block;
+            opacity: 1;
+            margin: 10px 0;
+            color: #368888;
+        }
+
+        #sidepanel-bio {
+            font-size: 14px;
+            display: block;
+            opacity: .8;
+            margin: 10px 0;
+        }
+
+        #sidepanel-id {
+            font-family: "Google Sans Code", monospace;
+            opacity: .4;
+            font-size: 12px;
+            display: block;
+        }
+
+        #sidepanel-friend-count {
+            margin-top: 10px;
+            opacity: .4;
+            font-size: 12px;
+            display: block;
+        }
+
+        #sidepanel img {
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+
+        #sidepanel.closed {
+            right: -500px;
+        }
+
+        #sidepanel-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: block;
+            cursor: pointer;
+            font-weight: bold;
+            color: #368888;
+            opacity: .9;
+            padding: 4px 8px;
+        }
+
+        #sidepanel-close:hover {
+            opacity: 1;
+        }
+
+        #sidepanel-mutual-list li {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -185,6 +275,20 @@
     <input style="display: none" id="search" type="text" placeholder="Search...">
     <button style="display: none" id="friends-progress-play" type="button">Play/Pause</button>
     <input style="display: none" type="range" id="friends-progress" min="0" max="1" />
+    <span style="display: none" id="help-1">Click node for details</span>
+
+    <div id="sidepanel" class="closed">
+        <span id="sidepanel-name"></span>
+        <span id="sidepanel-id"></span>
+        <span id="sidepanel-friend-count"></span>
+        <span id="sidepanel-status"></span>
+        <span id="sidepanel-bio"></span>
+        <img id="sidepanel-profile-pic" width="350">
+        <img id="sidepanel-avatar-pic" width="350">
+        <span id="sidepanel-mutual-title">Mutual Friends:</span>
+        <ul id="sidepanel-mutual-list"></ul>
+        <span id="sidepanel-close">X</span>
+    </div>
 
     <div id="content" style="display: none">
         <h1>VRChat Mutual Friends Explorer</h1>

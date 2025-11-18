@@ -8,6 +8,8 @@ const togglePicsButton = document.getElementById('toggle-pics');
 const searchInput = document.getElementById('search');
 const friendsProgressRange = document.getElementById('friends-progress');
 const friendsProgressButton = document.getElementById('friends-progress-play');
+const help1 = document.getElementById('help-1');
+const sidepanel = document.getElementById('sidepanel');
 
 input?.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
@@ -65,6 +67,10 @@ searchInput!.addEventListener('keydown', e => {
     }
 });
 
+document.getElementById('sidepanel-close')?.addEventListener('click', () => {
+    sidepanel!.classList.add('closed');
+});
+
 const start = () => {
     const storedData = localStorage.getItem('vrchat-friends-data');
     let parsedStoredData: null | Data = null;
@@ -102,6 +108,7 @@ const start = () => {
     searchInput!.style.display = 'block';
     friendsProgressRange!.style.display = 'block';
     friendsProgressButton!.style.display = 'block';
+    help1!.style.display = 'block';
 
     if (parsedStoredData) {
         createGraph(parsedStoredData);

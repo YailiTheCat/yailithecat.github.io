@@ -3,9 +3,27 @@ import louvain from 'graphology-communities-louvain';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
 import { hslToRgb } from './helpers';
 import Sigma from 'sigma';
-import { Data } from './types';
+import { Data, Friend } from './types';
 
 export function createGraph(data: Data) {
+    const openSidePanel = (friend: Friend) => {
+        const sidepanel = document.getElementById('sidepanel')!;
+        (document.getElementById('sidepanel-profile-pic') as HTMLImageElement).src = friend.imageUrl;
+        (document.getElementById('sidepanel-name') as HTMLDivElement).innerText = friend.displayName;
+        (document.getElementById('sidepanel-id') as HTMLDivElement).innerText = friend.id;
+        (document.getElementById('sidepanel-bio') as HTMLDivElement).innerText = friend.bio;
+        (document.getElementById('sidepanel-mutual-list') as HTMLDivElement).innerHTML =
+            data.mutuals[friend.id]
+                ?.map(item => `<li>${nodeToName[item]}</li>`)
+                .sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)
+                .join('') ?? '';
+        (document.getElementById('sidepanel-friend-count') as HTMLDivElement).innerText =
+            `Mutual friends: ${data.mutuals[friend.id]?.length ?? 0}`;
+        (document.getElementById('sidepanel-status') as HTMLDivElement).innerText = friend.statusDescription;
+        (document.getElementById('sidepanel-avatar-pic') as HTMLImageElement).src = friend.currentAvatarImageUrl;
+        sidepanel.classList.remove('closed');
+    };
+
     let loadedImgs = 0;
     let created = false;
     const nodeToName: Record<string, string> = {};
@@ -45,13 +63,26 @@ export function createGraph(data: Data) {
             hoveredNode = null;
         });
 
+        sigma.addListener('clickNode', e => {
+            const nodeId = e.node;
+            if (nodeId === 'me') {
+                return;
+            }
+            const friend = data.friends.find(f => f.id === nodeId);
+            if (!friend) {
+                return;
+            }
+
+            openSidePanel(friend);
+        });
+
         sigma.addListener('afterRender', () => {
             const playing = !!(window as any).playing;
 
             if (playing) {
                 const now = +new Date();
                 const delta = now - lastFrameTime;
-                if (delta > 200) {
+                if (delta > 300) {
                     lastFrameTime = now;
                     const newVal = parseInt(friendsProgressRange.value, 10) + 1;
                     friendsProgressRange.value = `${newVal > parseInt(friendsProgressRange.max, 10) ? 0 : newVal}`;
@@ -119,7 +150,17 @@ export function createGraph(data: Data) {
                           };
                 }
 
-                return data;
+                const recentlyPlayed = (nodeToIndex[node] ?? 0) > visibleSlider - (2 + 3);
+                const lastPlayed = (nodeToIndex[node] ?? 0) > visibleSlider - 2;
+
+                return playing
+                    ? {
+                          ...data,
+                          label: recentlyPlayed ? data.label : '',
+                          forceLabel: recentlyPlayed,
+                          color: lastPlayed ? 'white' : data.color,
+                      }
+                    : data;
             });
 
             sigma.setSetting(
