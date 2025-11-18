@@ -15,7 +15,7 @@ export function createGraph(data: Data) {
         (document.getElementById('sidepanel-mutual-list') as HTMLDivElement).innerHTML =
             data.mutuals[friend.id]
                 ?.map(item => `<li>${nodeToName[item]}</li>`)
-                .sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)
+                .sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1))
                 .join('') ?? '';
         (document.getElementById('sidepanel-friend-count') as HTMLDivElement).innerText =
             `Mutual friends: ${data.mutuals[friend.id]?.length ?? 0}`;
@@ -26,6 +26,7 @@ export function createGraph(data: Data) {
 
     let loadedImgs = 0;
     let created = false;
+    let noPics = false;
     const nodeToName: Record<string, string> = {};
     const nodeToIndex: Record<string, number> = {};
     const friendsProgressRange = document.getElementById('friends-progress') as HTMLInputElement;
@@ -96,7 +97,7 @@ export function createGraph(data: Data) {
                 .toLowerCase();
 
             sigma.setSetting('nodeReducer', (node, data) => {
-                if (node != 'me') {
+                if (node != 'me' && !noPics) {
                     const element = document.getElementById(`img-${node}`);
                     const position = sigma.graphToViewport({ x: data.x, y: data.y });
                     const size = sigma.scaleSize(data.size * 1.7, sigma.getCamera().ratio);
@@ -180,14 +181,25 @@ export function createGraph(data: Data) {
     const graph = new Graph();
     graph.addNode('me', { label: 'Me', x: 0, y: 0, size: 5, color: 'green' });
 
-    data.friends.forEach(f => {
-        document.getElementById('img-tmp')!.innerHTML +=
-            `<img style="background: black; object-fit: fill; aspect-ratio: 1/1; border-radius: 50%; display: block; position: absolute; left: -1000px" width="50" id="img-${f.id}" src="${f.imageUrl}" />`;
-        imgLoaded();
-        graph.addNode(f.id, { label: f.displayName, x: Math.random(), y: Math.random(), size: 5, image: f.imageUrl });
-        graph.addEdge('me', f.id, { color: 'rgb(0,0,120)' });
-        nodeToName[f.id] = f.displayName;
-    });
+    if (data.friends.length > 2000) {
+        createRenderer();
+        noPics = true;
+    } else {
+        data.friends.forEach(f => {
+            document.getElementById('img-tmp')!.innerHTML +=
+                `<img style="background: black; object-fit: fill; aspect-ratio: 1/1; border-radius: 50%; display: block; position: absolute; left: -1000px" width="50" id="img-${f.id}" src="${f.imageUrl}" />`;
+            imgLoaded();
+            graph.addNode(f.id, {
+                label: f.displayName,
+                x: Math.random(),
+                y: Math.random(),
+                size: 5,
+                image: f.imageUrl,
+            });
+            graph.addEdge('me', f.id, { color: 'rgb(0,0,120)' });
+            nodeToName[f.id] = f.displayName;
+        });
+    }
 
     Object.keys(data.mutuals ?? {}).forEach(id1 => {
         data.mutuals[id1].forEach(id2 => {
